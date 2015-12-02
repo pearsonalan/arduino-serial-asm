@@ -28,3 +28,7 @@ Register 0 A) to determine when UDR (the USART Data Register) is empty and
 ready for a new byte to be sent. The `serial-interrupt.asm` program enables
 the UDRE0 interrupt and has an interrupt handler to send the next byte 
 of the message.
+
+* For a great introduction to AVR Assembly programming see [Command Line
+Assembly Language AVR Tutorials](http://www.instructables.com/id/Command-Line-AVR-Tutorials/)
+on Instructables.
