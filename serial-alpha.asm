@@ -3,7 +3,7 @@
 ;************************************
 
 .nolist
-.include "./m328Pdef.inc"
+.include "./m328Pdef.asm"
 .list
 
 
@@ -25,6 +25,14 @@
 
 .org 0x0034
 reset: 
+	clr	r1			; set the SREG to 0
+	out	SREG, r1
+
+	ldi	r28, LOW(RAMEND)	; init the stack pointer to point to RAMEND
+	ldi	r29, HIGH(RAMEND)
+	out	SPL, r28
+	out	SPH, r29
+
 	rcall	USART_Init		; initialize the serial communications
 	sei				; enable global interrupts
 	rjmp	main

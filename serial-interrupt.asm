@@ -6,18 +6,17 @@
 ;*****************************************************************************
 
 .nolist
-.include "./m328Pdef.inc"
+.include "./m328Pdef.asm"
 .list
 
 .def temp = r16
 .def overflows = r18
 
 ;
-; Set up the Interrupt Vector at 0x0000
-;
-; We only use 1 interrupt in this program, the RESET
-; interrupt.
-;
+; Set up the Interrupt Vector:
+;   0x0000 (RESET) => reset
+;   0x0020 (TIMER0 OVF) => overflow_handler
+;   0x0026 (UDRE0) => DataRegisterEmptyHandler
 
 .org 0x0000
 	jmp reset		; PC = 0x0000	RESET
@@ -33,6 +32,14 @@
 
 .org 0x0034
 reset: 
+	clr	r1			; set the SREG to 0
+	out	SREG, r1
+
+	ldi	r28, LOW(RAMEND)	; init the stack pointer to point to RAMEND
+	ldi	r29, HIGH(RAMEND)
+	out	SPL, r28
+	out	SPH, r29
+
 	ldi	temp, 5
 	out	TCCR0B, temp		; set the Clock Selector Bits CS00, CS01, CS02 to 101
 					; this puts Timer Counter0, TCNT0 in to FCPU/1024 mode

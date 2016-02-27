@@ -6,17 +6,16 @@
 ;************************************
 
 .nolist
-.include "./m328Pdef.inc"
+.include "./m328Pdef.asm"
 .list
 
 .def temp = r16
 .def overflows = r18
 
 ;
-; Set up the Interrupt Vector at 0x0000
-;
-; We only use 1 interrupt in this program, the RESET
-; interrupt.
+; Set up the Interrupt Vector:
+;   0x0000 (RESET) => reset
+;   0x0020 (TIMER0 OVF) => overflow_handler
 ;
 
 .org 0x0000
@@ -25,23 +24,31 @@
 .org 0x0020
 	jmp overflow_handler	; PC = 0x0020   TIMER0 OVF
 
+
 ;======================
 ; initialization
 
 .org 0x0034
 reset: 
-	ldi	temp, 5
-	out	TCCR0B, temp		; set the Clock Selector Bits CS00, CS01, CS02 to 101
-					; this puts Timer Counter0, TCNT0 in to FCPU/1024 mode
+	clr	r1			; set the SREG to 0
+	out	SREG, r1
+
+	ldi	r28, LOW(RAMEND)	; init the stack pointer to point to RAMEND
+	ldi	r29, HIGH(RAMEND)
+	out	SPL, r28
+	out	SPH, r29
+
+	ldi	temp, 5			; set the Clock Selector Bits CS00, CS01, CS02 to 101
+	out	TCCR0B, temp		; this puts Timer Counter0, TCNT0 in to FCPU/1024 mode
 					; so it ticks at the CPU freq/1024
-	ldi	temp, 0b00000001
-	sts	TIMSK0, temp		; set the Timer Overflow Interrupt Enable (TOIE0) bit 
-					; of the Timer Interrupt Mask Register (TIMSK0)
+
+	ldi	temp, 0b00000001	; set the Timer Overflow Interrupt Enable (TOIE0) bit 
+	sts	TIMSK0, temp		; of the Timer Interrupt Mask Register (TIMSK0)
 
 	clr	temp
 	out	TCNT0, temp		; initialize the Timer/Counter to 0
 
-	rcall	USART_Init		; initialize the serial communications
+	rcall	USART_Init_9600		; initialize the serial communications
 
 	sei				; enable global interrupts
 
@@ -55,9 +62,9 @@ overflow_handler:
 	reti				; return from interrupt
 
 ;=======================
-; Initialize the USART
+; Initialize the USART to 9600 Baud
 ;
-USART_Init:
+USART_Init_9600:
 	; these values are for 9600 Baud with a 16MHz clock
 	ldi	r16, 103
 	clr	r17
