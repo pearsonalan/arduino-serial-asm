@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, sig_int);
 
 	/* register a timer to terminate the loop */
-	avr_cycle_timer_register_usec(avr, 10000000, termination_timer, NULL);
+	avr_cycle_timer_register_usec(avr, 1000000, termination_timer, NULL);
 
 	/* show_ports(avr); */
 
