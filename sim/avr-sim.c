@@ -68,11 +68,16 @@ void show_ports(avr_t *avr)
 	}
 }
 
-avr_cycle_count_t termination_timer(struct avr_t * avr, avr_cycle_count_t when, void * param)
+static avr_cycle_count_t termination_timer(struct avr_t * avr, avr_cycle_count_t when, void * param)
 {
 	printf("*** Termination timer called at %lld ***\n", when);
 	avr->state = cpu_Done;
 	return 0;
+}
+
+static void uart_output_cb(struct avr_irq_t *irq, uint32_t value, void *param)
+{
+	fputc(value, stdout);
 }
 
 int main(int argc, char *argv[])
@@ -122,6 +127,10 @@ int main(int argc, char *argv[])
 	avr->state = cpu_Stopped;
 	avr_gdb_init(avr);
 #endif
+
+	/* hook up the UART to stdout */
+	avr_irq_register_notify(avr_io_getirq(avr, AVR_IOCTL_UART_GETIRQ('0'), UART_IRQ_OUTPUT),
+		uart_output_cb, NULL);
 
 	/*	VCD file initialization */
 	printf("*** Initializing VCD Output ***\n");
