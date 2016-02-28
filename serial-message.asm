@@ -10,7 +10,7 @@
 .list
 
 .def temp = r16
-.def overflows = r18
+.def overflows = r3
 
 ;
 ; Set up the Interrupt Vector:
@@ -129,12 +129,13 @@ newline:
 
 ;====================
 ; simple delay function 
-;   delay about 1 second
+;   delay about 0.1 second
 
 delay:
 	clr	overflows		; set overflows to 0 
 sec_count:
-	cpi	overflows, 61		; compare number of overflows and 61
+	mov	temp, overflows		; compare number of overflows and 6
+	cpi	temp, 6
 	brne	sec_count		; branch to back to sec_count if not equal 
 	ret				; if 61 overflows have occured return
 
