@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <signal.h>
 
 #include "sim_avr.h"
 #include "avr_ioport.h"
@@ -70,7 +71,7 @@ void show_ports(avr_t *avr)
 
 static avr_cycle_count_t termination_timer(struct avr_t * avr, avr_cycle_count_t when, void * param)
 {
-	printf("*** Termination timer called at %lld ***\n", when);
+	printf("*** Termination timer called at %ld ***\n", when);
 	avr->state = cpu_Done;
 	return 0;
 }
